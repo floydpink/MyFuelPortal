@@ -1,0 +1,3 @@
+DOMAIN = "myfuelportal"
+CONF_PROVIDER = "provider"
+DEFAULT_SCAN_INTERVAL_HOURS = 12

@@ -1,124 +1,97 @@
-MyFuelPortal Home Assistant Integration
+# MyFuelPortal — Home Assistant Integration
 
-Integrate your MyFuelPortal account with Home Assistant to monitor propane tank levels, usage, and delivery information. This integration also provides a daily propane usage sensor that can be added to Home Assistant’s Energy dashboard.
+[![hacs_badge](https://img.shields.io/badge/HACS-Custom-41BDF5.svg)](https://github.com/hacs/integration)
 
-THIS INTEGRATION NEEDS TO BE EDITED TO ADD THE SPECIFIC GAS PROVIDER'S URL AS CONFIGURABLE. CURRENTLY ALL REFERENCES TO THE GAS PROVIDER URL ARE CALLED OUT AS "MYPROVIDER".
+Monitor your propane (or other fuel) tank levels, deliveries, and daily usage in Home Assistant via [MyFuelPortal](https://www.myfuelportal.com/). Many fuel providers use MyFuelPortal for online tank monitoring — this integration scrapes your provider's portal and creates sensors for each tank.
 
-Features
+## Features
 
-Monitors your propane tank(s) individually
+- **Works with any MyFuelPortal provider** — enter your provider's subdomain during setup
+- **Per-tank device grouping** — each tank appears as its own device in HA
+- **Energy dashboard ready** — Cumulative Usage sensor with `state_class: total_increasing`
+- **Auto-refresh** every 12 hours (matches portal update frequency)
+- **State restoration** — cumulative usage survives HA restarts
 
-Tracks:
+## Sensors
 
-Current gallons
+| Sensor | Description | State Class |
+|--------|-------------|-------------|
+| Gallons | Current gallons in tank | `measurement` |
+| Level | Tank fill percentage (%) | `measurement` |
+| Capacity | Tank capacity (gallons) | — |
+| Last Delivery | Date of last fuel delivery | — |
+| Reading Date | Date of last monitor reading | — |
+| Daily Usage | Estimated gallons/day | `measurement` |
+| Cumulative Usage | Total gallons consumed (for Energy dashboard) | `total_increasing` |
 
-Tank percentage
+## Installation
 
-Tank capacity
+### HACS (Recommended)
 
-Last delivery date
+1. Open **HACS** → **Integrations** → click the **⋮** menu (top right) → **Custom repositories**
+2. Enter this repository URL and select **Integration** as the category:
+   ```
+   https://github.com/DeltaNu1142/MyFuelPortal
+   ```
+3. Click **Add**, then find **MyFuelPortal** in the HACS store and click **Install**
+4. **Restart Home Assistant**
 
-Last reading date
+### Manual
 
-Calculates daily propane usage for each tank
+1. Download this repository
+2. Copy the `custom_components/myfuelportal/` folder into your Home Assistant `config/custom_components/` directory
+3. Restart Home Assistant
 
-Fully compatible with Home Assistant Energy dashboard for propane usage tracking
+## Setup
 
-Unique IDs for all sensors to allow management in Home Assistant UI
+1. Go to **Settings** → **Devices & Services** → **Add Integration**
+2. Search for **MyFuelPortal**
+3. Enter:
+   - **Provider subdomain** — the part before `.myfuelportal.com` in your provider's portal URL (e.g., if your portal is at `https://myprovider.myfuelportal.com`, enter `myprovider`)
+   - **Email address** — your MyFuelPortal login email
+   - **Password** — your MyFuelPortal password
+4. Sensors for your tank(s) will appear automatically, grouped under a device per tank
 
-Auto-refreshes tank data every 12 hours
+## Energy Dashboard
 
-Installation
+To track propane consumption in the Energy dashboard:
 
-Place the myfuelportal folder in your config/custom_components/ directory:
+1. Go to **Settings** → **Dashboards** → **Energy**
+2. Under **Gas consumption**, click **Add gas source**
+3. Select the **Cumulative Usage** sensor for your tank
+4. Optionally configure a fixed cost per unit (your price per gallon)
 
-config/
-└── custom_components/
-    └── myfuelportal/
+The Cumulative Usage sensor tracks total gallons consumed over time. It increases as your tank level drops between deliveries and correctly handles refills (tank level going up).
 
+## How It Works
 
-Ensure the folder contains:
+The integration logs into your provider's MyFuelPortal site, navigates to the tank page, and scrapes the current tank data. Your provider's satellite tank monitor typically updates readings at least once per day.
 
-__init__.py
+- Data refreshes every **12 hours**
+- Login uses the standard MyFuelPortal web interface
+- Supports accounts with **multiple tanks**
 
-config_flow.py
+## Troubleshooting
 
-manifest.json
+| Issue | Solution |
+|-------|----------|
+| Invalid credentials | Double-check your MyFuelPortal email and password |
+| Cannot connect | Verify your HA instance can reach `https://<provider>.myfuelportal.com` |
+| No sensors created | Ensure your MyFuelPortal account has active tank data |
+| Energy dashboard not updating | Wait for the next 12-hour refresh cycle, or restart the integration |
 
-sensor.py
+## Requirements
 
-strings.json
+- Home Assistant **2023.7** or later
+- A MyFuelPortal account with your fuel provider
 
-Restart Home Assistant.
+## Credits
 
-Configuration
+Original integration by [DeltaNu1142](https://github.com/DeltaNu1142). Refactored for HACS compatibility, configurable providers, bug fixes, and Home Assistant best practices.
 
-Go to Settings → Devices & Services → Add Integration.
+### Changes from Original
 
-Search for MyFuelPortal and select it.
-
-Enter your Email Address and Password for MyFuelPortal.
-
-After setup, sensors for your tank(s) will be automatically added.
-
-Optionally, add the Daily Usage sensor to the Energy dashboard under Gas.
-
-Sensor List
-Sensor	Description
-<tank_name> gallons	Current gallons in the tank
-<tank_name> percent	Tank fill level (%)
-<tank_name> capacity	Tank capacity (gallons)
-<tank_name> last_delivery	Last delivery date (ISO format)
-<tank_name> reading_date	Last reading date (ISO format)
-<tank_name> Daily Usage	Estimated gallons used per day (for Energy dashboard)
-
-All sensors have unique IDs for easy UI management.
-
-Notes
-
-Currently supports single or multiple tanks.
-
-Daily usage is calculated based on previous reading versus current gallons.
-
-Tanks are refreshed every 12 hours.
-
-Login uses the official MyFuelPortal login page: https://MYPROVIDER.myfuelportal.com/Account/Login.
-
-Requirements
-
-Home Assistant 2023.7 or later
-
-Python packages:
-
-requests
-
-beautifulsoup4
-
-Troubleshooting
-
-Invalid credentials: Double-check your MyFuelPortal email and password.
-
-Cannot connect: Ensure your HA instance can access https://MYPROVIDER.myfuelportal.com/.
-
-No sensors created: Make sure your MyFuelPortal account has active tank data.
-
-Energy dashboard not updating: Wait until the next scheduled refresh (every 12 hours) or force refresh in HA.
-
-Changelog
-
-1.0.4
-
-Added daily usage sensor for Energy dashboard
-
-Updated tank dates to ISO format
-
-Fixed unique IDs for all sensors
-
-1.0.3
-
-Initial functional version with tanks and readings
-
-Author
-
-Custom integration by DeltaNu1142 and ChatGPT.
-Inspired by MyFuelPortal customer portal.
+- **Configurable provider** — config flow prompts for subdomain; no code editing required
+- **HACS-compatible** — proper `custom_components/` structure, `hacs.json`, translations
+- **Bug fixes** — `CumulativeUsageSensor` referenced undefined `self._tank_name`; `gallons` sensor had incorrect `state_class` (`TOTAL_INCREASING` → `MEASUREMENT`); duplicate coordinator removed
+- **Best practices** — `CoordinatorEntity` base class, `SensorEntity`, device grouping per tank, proper units (`UnitOfVolume.GALLONS`), icons, state restoration for cumulative sensor
