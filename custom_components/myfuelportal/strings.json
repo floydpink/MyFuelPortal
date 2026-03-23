@@ -1,0 +1,22 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "MyFuelPortal Account",
+        "description": "Enter your fuel provider's MyFuelPortal subdomain and login credentials.",
+        "data": {
+          "provider": "Provider subdomain (e.g. myprovider)",
+          "username": "Email address",
+          "password": "Password"
+        }
+      }
+    },
+    "error": {
+      "invalid_auth": "Invalid email or password.",
+      "cannot_connect": "Cannot connect to MyFuelPortal. Check the provider name."
+    },
+    "abort": {
+      "cannot_connect": "Unable to reach MyFuelPortal."
+    }
+  }
+}
